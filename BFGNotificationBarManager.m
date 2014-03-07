@@ -82,7 +82,7 @@ NSString * const BFGNotificationBarDidHideNotification = @"BFGNotificationBarDid
 - (void)addNotificationBar:(BFGNotificationBar *)bar {
     [self.queue addObject:bar];
     
-    if ([self.queue count] == 1 && ![self isBarShowing]) {
+    if (![self isBarShowing]) {
         [self dequeueNext];
     }
 }
