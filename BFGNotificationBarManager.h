@@ -34,5 +34,6 @@ UIKIT_EXTERN NSString * const BFGNotificationBarDidHideNotification;
 + (BFGNotificationBarManager *)sharedManager;
 
 - (void)addNotificationBar:(BFGNotificationBar *)bar;
+- (void)clearQueue;
 
 @end

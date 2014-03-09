@@ -59,8 +59,7 @@ NSString * const BFGNotificationBarDidHideNotification = @"BFGNotificationBarDid
     self = [super init];
     
     if (self) {
-        self.queue = [NSMutableArray array];
-        self.barShowing = NO;
+        [self clearQueue];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(barWasHidden:)
@@ -85,6 +84,11 @@ NSString * const BFGNotificationBarDidHideNotification = @"BFGNotificationBarDid
     if (![self isBarShowing]) {
         [self dequeueNext];
     }
+}
+
+- (void)clearQueue {
+    self.queue = [NSMutableArray array];
+    self.barShowing = NO;
 }
 
 #pragma mark - Private methods
