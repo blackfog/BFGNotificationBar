@@ -38,7 +38,7 @@ typedef NS_ENUM(NSUInteger, BFGNotificationBarTheme) {
 
 typedef void (^BFGNotificationBarGestureBlock)(BFGNotificationBar *bar);
 
-@interface BFGNotificationBar : NSObject
+@interface BFGNotificationBar : NSOperation
 
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, strong) UIImage *backgroundImage;
@@ -60,7 +60,5 @@ typedef void (^BFGNotificationBarGestureBlock)(BFGNotificationBar *bar);
 @property (nonatomic, strong) BFGNotificationBarGestureBlock swipeUpAction;
 
 + (UIImage *)backgroundImageForTheme:(BFGNotificationBarTheme)theme;
-
-- (void)show;
 
 @end

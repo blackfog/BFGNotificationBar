@@ -46,6 +46,7 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
 @property (nonatomic, strong) UIGravityBehavior *gravity;
 @property (nonatomic, strong) UICollisionBehavior *collision;
 @property (nonatomic, strong) UIDynamicItemBehavior *elasticity;
+@property (nonatomic) BOOL finished;
 
 @end
 
@@ -78,6 +79,7 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
 @synthesize gravity;
 @synthesize collision;
 @synthesize elasticity;
+@synthesize finished;
 
 #pragma mark - Constructor
 
@@ -103,6 +105,7 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
         self.showing = NO;
         self.tapAction = nil;
         self.swipeUpAction = nil;
+        self.finished = NO;
     }
 
     return self;
@@ -127,19 +130,32 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
     }
 }
 
-#pragma mark - Public methods
+#pragma mark - NSOperation overrides (isFinished covered by the @property)
 
-- (void)show {
-    [self prepareNotificationBar];
-    [self slideIn];
-    
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.dismissAfterInterval * NSEC_PER_SEC));
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        [self slideOut];
+- (void)main {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self prepareNotificationBar];
+        [self slideIn];
+
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.dismissAfterInterval * NSEC_PER_SEC));
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            [self slideOut];
+        });
     });
 }
 
+- (BOOL)isFinished {
+    return self.finished;
+}
+
 #pragma mark - Private methods
+
+// needed to send the KVO notifications for the NSOperation state
+- (void)setFinishedState:(BOOL)newState {
+    [self willChangeValueForKey:@"isFinished"];
+    self.finished = newState;
+    [self didChangeValueForKey:@"isFinished"];
+}
 
 - (void)prepareNotificationBar {
     [self calculateFrames];
@@ -187,6 +203,7 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
 - (void)performTapAction {
     if (self.tapAction) {
         self.tapAction(self);
+        [self slideOut];
     }
     else if (self.tapToDismiss) {
         [self slideOut];
@@ -204,6 +221,7 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
 - (void)performSwipeUpAction {
     if (self.swipeUpAction) {
         self.swipeUpAction(self);
+        [self slideOut];
     }
     else {
         [self slideOut];
@@ -245,11 +263,11 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
                      animations:^{
                         self.bar.frame = self.barFrameHidden;
                      }
-                     completion:^void (BOOL finished) {
-                         if (finished) {
+                     completion:^void (BOOL allDone) {
+                         if (allDone) {
                              self.showing = NO;
                              [self.bar removeFromSuperview];
-                             [[NSNotificationCenter defaultCenter] postNotificationName:BFGNotificationBarDidHideNotification object:self];
+                             [self setFinishedState:YES]; // use the KVO one!
                          }
                      }];
 }

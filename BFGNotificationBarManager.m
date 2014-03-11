@@ -26,19 +26,17 @@
 #import "BFGNotificationBarManager.h"
 #import "BFGNotificationBar.h"
 
-NSString * const BFGNotificationBarDidHideNotification = @"BFGNotificationBarDidHideNotification";
-
 @interface BFGNotificationBarManager ()
 
-@property (nonatomic, strong) NSMutableArray *queue;
-@property (nonatomic, getter = isBarShowing) BOOL barShowing;
+@property (nonatomic, strong) NSMutableDictionary *queues;
+@property (nonatomic, strong) NSException *unknownQueueException;
 
 @end
 
 @implementation BFGNotificationBarManager
 
-@synthesize queue;
-@synthesize barShowing;
+@synthesize queues;
+@synthesize unknownQueueException;
 
 #pragma mark - Singleton
 
@@ -59,56 +57,101 @@ NSString * const BFGNotificationBarDidHideNotification = @"BFGNotificationBarDid
     self = [super init];
     
     if (self) {
-        [self clearQueue];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(barWasHidden:)
-                                                     name:BFGNotificationBarDidHideNotification
-                                                   object:nil];
+        self.queues = [NSMutableDictionary dictionary];
+
+        self.unknownQueueException = [NSException exceptionWithName:@"BFGUnknownQueueException"
+                                                             reason:@"The requested queue does not exist"
+                                                           userInfo:nil];
     }
     
     return self;
 }
 
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:BFGNotificationBarDidHideNotification
-                                                  object:nil];
-}
-
 #pragma mark - Public methods
 
-- (void)addNotificationBar:(BFGNotificationBar *)bar {
-    [self.queue addObject:bar];
-    
-    if (![self isBarShowing]) {
-        [self dequeueNext];
+- (BFGNotificationBarQueueHandle *)createQueue {
+    BFGNotificationBarQueueHandle *handle = [NSUUID UUID];
+    NSString *queueName = [NSString stringWithFormat:@"com.blackfoggames.NotificationQueue.%@", [handle UUIDString]];
+
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    queue.name = queueName;
+    queue.maxConcurrentOperationCount = 1;
+
+    [self.queues setObject:queue forKey:handle];
+
+    return handle;
+}
+
+- (void)addNotificationBar:(BFGNotificationBar *)bar toQueue:(BFGNotificationBarQueueHandle *)handle {
+    NSOperationQueue *queue = [self.queues objectForKey:handle];
+
+    if (queue) {
+        [queue addOperation:bar];
+    }
+    else {
+        @throw self.unknownQueueException;
     }
 }
 
-- (void)clearQueue {
-    self.queue = [NSMutableArray array];
-    self.barShowing = NO;
+- (void)clearQueue:(BFGNotificationBarQueueHandle *)handle {
+    NSOperationQueue *queue = [self.queues objectForKey:handle];
+
+    if (queue) {
+        [queue cancelAllOperations];
+    }
+    else {
+        @throw self.unknownQueueException;
+    }
+}
+
+- (void)pauseQueue:(BFGNotificationBarQueueHandle *)handle {
+    NSOperationQueue *queue = [self.queues objectForKey:handle];
+
+    if (queue) {
+        if (!queue.isSuspended) {
+            [queue setSuspended:YES];
+        }
+    }
+    else {
+        @throw self.unknownQueueException;
+    }
+}
+
+- (void)restartQueue:(BFGNotificationBarQueueHandle *)handle {
+    NSOperationQueue *queue = [self.queues objectForKey:handle];
+
+    if (queue) {
+        if (queue.isSuspended) {
+            [queue setSuspended:NO];
+        }
+    }
+    else {
+        @throw self.unknownQueueException;
+    }
+}
+
+- (NSUInteger)countForQueue:(BFGNotificationBarQueueHandle *)handle {
+    NSOperationQueue *queue = [self.queues objectForKey:handle];
+
+    if (queue) {
+        return queue.operationCount;
+    }
+    else {
+        @throw self.unknownQueueException;
+    }
+}
+
+- (void)removeQueue:(BFGNotificationBarQueueHandle *)handle {
+    if ([self.queues objectForKey:handle]) {
+        [self.queues removeObjectForKey:handle];
+    }
+    else {
+        @throw self.unknownQueueException;
+    }
 }
 
 #pragma mark - Private methods
 
-- (void)dequeueNext {
-    BFGNotificationBar *bar = [self.queue firstObject];
-    
-    if (bar) {
-        [self.queue removeObjectAtIndex:0];
-        self.barShowing = YES;
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [bar show];
-        });
-    }
-}
-
-- (void)barWasHidden:(NSNotification *)notification {
-    self.barShowing = NO;
-    [self dequeueNext];
-}
+// none
 
 @end

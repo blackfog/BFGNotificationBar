@@ -25,15 +25,20 @@
 
 #import <Foundation/Foundation.h>
 
-@class BFGNotificationBar;
+typedef NSUUID BFGNotificationBarQueueHandle;
 
-UIKIT_EXTERN NSString * const BFGNotificationBarDidHideNotification;
+@class BFGNotificationBar;
 
 @interface BFGNotificationBarManager : NSObject
 
 + (BFGNotificationBarManager *)sharedManager;
 
-- (void)addNotificationBar:(BFGNotificationBar *)bar;
-- (void)clearQueue;
+- (BFGNotificationBarQueueHandle *)createQueue;
+- (void)addNotificationBar:(BFGNotificationBar *)bar toQueue:(BFGNotificationBarQueueHandle *)handle;
+- (void)clearQueue:(BFGNotificationBarQueueHandle *)handle;
+- (void)pauseQueue:(BFGNotificationBarQueueHandle *)handle;
+- (void)restartQueue:(BFGNotificationBarQueueHandle *)handle;
+- (NSUInteger)countForQueue:(BFGNotificationBarQueueHandle *)handle;
+- (void)removeQueue:(BFGNotificationBarQueueHandle *)handle;
 
 @end
