@@ -2,9 +2,10 @@
 ``BFGNotificationBar`` is a common drop-down notification library used in a number of my own projects. It has a number of color themes, has many customizable options (including gesture support), uses iOS 7 dynamics, supports both iPhone and iPad, supports both landscape and portrait orientation, and manages multiple successive notification bars in a queue.
 
 # Overview
-Notification bars are managed through the ``BFGNotificationBarManager`` singleton. This manages the notification queue. To use it, you create a ``BFGNotificationBar`` object and then add the notification bar to the manager and it does the rest of the work setting up the bar and managing its display. An example:
+Notification bars are managed through the ``BFGNotificationBarManager`` singleton. This manages the notification queues. To use it, you create as many queues as you need for your application (such as a queue per view or view controller), create a ``BFGNotificationBar`` object and then add the notification bar to the queue and it does the rest of the work setting up the bar and managing its display. An example:
 
 `````objective-c
+BFGNotificationBarQueueHandle *handle = [[BFGNotificationBarManager sharedManager] createQueue];
 BFGNotificationBar *bar = [BFGNotificationBar alloc] init];
 
 bar.backgroundImage = [BFGNotificationBar backgroundImageForTheme:BFGNotificationBarThemeRed];
@@ -13,8 +14,10 @@ bar.gesturesEnabled = YES;
 bar.dismissAfterInterval = 6.0f;
 bar.targetView = self.view;
 
-[[BFGNotificationBarManager sharedManager] addNotificationBar:bar];
+[[BFGNotificationBarManager sharedManager] addNotificationBar:bar toQueue:handle];
 `````
+
+Each queue is an instance of ``NSOperationQueue`` managed by the Manager. ``BFGNotificationBar`` objects are subclasses of ``NSOperation``. The Manager exposes a number of methods to manage a queue, as well.
 
 # Requirements
 ``BFGNotificationBar`` requires iOS 7.
