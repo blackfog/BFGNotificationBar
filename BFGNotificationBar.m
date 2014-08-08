@@ -229,8 +229,7 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
 }
 
 - (void)calculateFrames {
-    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
-    CGFloat windowWidth = UIDeviceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation) ? window.frame.size.height : window.frame.size.width;
+    CGFloat windowWidth = self.targetView.frame.size.width;
 
     self.barFrameHidden = CGRectMake(0.0f, 0.0f - self.barHeight - self.topOffset - 10.0f, windowWidth, self.barHeight);
     self.barFrameVisible = CGRectMake(0.0f, self.topOffset, windowWidth, self.barHeight);
