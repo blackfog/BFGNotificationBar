@@ -57,11 +57,11 @@
     self = [super init];
     
     if (self) {
-        self.queues = [NSMutableDictionary dictionary];
+        queues = [NSMutableDictionary dictionary];
 
-        self.unknownQueueException = [NSException exceptionWithName:@"BFGUnknownQueueException"
-                                                             reason:@"The requested queue does not exist"
-                                                           userInfo:nil];
+        unknownQueueException = [NSException exceptionWithName:@"BFGUnknownQueueException"
+                                                        reason:@"The requested queue does not exist"
+                                                      userInfo:nil];
     }
     
     return self;

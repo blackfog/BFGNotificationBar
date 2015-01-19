@@ -87,25 +87,25 @@ static NSString * const BFGBarBoundryIdentifier = @"BarBoundary";
     self = [super init];
 
     if (self) {
-        self.message = @"Default notification bar message.";
-        self.backgroundImage = [BFGNotificationBar backgroundImageForTheme:BFGNotificationBarThemeGray];
-        self.notificationImage = nil;
-        self.targetView = nil;
-        self.barHeight = 40.0f;
-        self.topOffset = 0.0f;
-        self.animationDuration = 0.33f;
-        self.dismissAfterInterval = 3.0f;
-        self.tapToDismiss = NO;
-        self.gesturesEnabled = NO;
-        self.barGoesBehind = nil;
-        self.barOpacity = 0.9f;
-        self.font = [UIFont systemFontOfSize:17.0f];
-        self.textColor = [UIColor whiteColor];
-        self.textAlignment = NSTextAlignmentCenter;
-        self.showing = NO;
-        self.tapAction = nil;
-        self.swipeUpAction = nil;
-        self.finished = NO;
+        message = @"Default notification bar message.";
+        backgroundImage = [BFGNotificationBar backgroundImageForTheme:BFGNotificationBarThemeGray];
+        notificationImage = nil;
+        targetView = nil;
+        barHeight = 40.0f;
+        topOffset = 0.0f;
+        animationDuration = 0.33f;
+        dismissAfterInterval = 3.0f;
+        tapToDismiss = NO;
+        gesturesEnabled = NO;
+        barGoesBehind = nil;
+        barOpacity = 0.9f;
+        font = [UIFont systemFontOfSize:17.0f];
+        textColor = [UIColor whiteColor];
+        textAlignment = NSTextAlignmentCenter;
+        showing = NO;
+        tapAction = nil;
+        swipeUpAction = nil;
+        finished = NO;
     }
 
     return self;
